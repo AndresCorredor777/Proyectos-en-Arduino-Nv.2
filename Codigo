@@ -1,0 +1,63 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP085.h>// Para el sensor BMP180/BMP280
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>// Librería para pantalla LCD con I2C
+
+#define DHTPIN 2 // Pin del sensor DHT
+#define DHTTYPE DHT11// Define si estás usando el DHT11
+#define RAIN_PIN 3 // Pin del sensor de lluvia
+
+DHT dht(DHTPIN, DHTTYPE); // Inicializa el sensor DHT
+Adafruit_BMP085 bmp; // Inicializa el sensor BMP180/BMP280
+LiquidCrystal_I2C lcd(0x27, 16, 2);// Dirección I2C del LCD 16x2
+
+void setup() {
+  Serial.begin(9600);// Inicializa la comunicación serie
+  lcd.init();// Inicializa la pantalla LCD
+  lcd.backlight(); // Enciende la retroiluminación
+  
+  dht.begin(); // Inicializa el sensor DHT
+  if (!bmp.begin()) { // Inicializa el sensor BMP180
+    Serial.println("Error BMP180!");
+    while (1); // Detener si no se encuentra el sensor
+  }
+
+  pinMode(RAIN_PIN, INPUT);// Inicializa el pin del sensor de lluvia
+}
+
+void loop() {
+  // Leer temperatura y humedad del DHT11
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  
+  // Leer presión del BMP180
+  float pressure = bmp.readPressure() / 100.0F; // Convertir a hPa
+  
+  // Leer estado del sensor de lluvia
+  int rain = digitalRead(RAIN_PIN);
+  String rainStatus = (rain == HIGH) ? "Ll" : "NoLl"; //LL = Si hay lluvia, NLL= No hay lluvia
+
+  // Mostrar los datos en el monitor serial
+  Serial.print("T: "); Serial.print(t); Serial.print(" C "); //T = Temperatura, C = °C
+  Serial.print("H: "); Serial.print(h); Serial.print(" % "); //H = Humedad
+  Serial.print("P: "); Serial.print(pressure); Serial.println(" hPa"); //P = Presión
+  Serial.println(rainStatus);
+  
+  // Mostrar los datos en la pantalla LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("T:"); lcd.print(t); lcd.print("C H:"); lcd.print(h); lcd.print("%");
+  lcd.setCursor(0, 1);
+  lcd.print("P:"); lcd.print(pressure); lcd.print("hPa");
+  lcd.setCursor(0, 1);
+  lcd.print(rainStatus);
+
+  // Enviar los datos por Bluetooth
+  Serial.print("Temp: "); Serial.print(t); Serial.print("C ");
+  Serial.print("Hum: "); Serial.print(h); Serial.print("% ");
+  Serial.print("Pressure: "); Serial.print(pressure); Serial.println("hPa");
+  Serial.println(rainStatus);
+
+  delay(2000); // Esperar 2 segundos entre lecturas
+}
