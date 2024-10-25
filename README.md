@@ -1,1 +1,2 @@
 # Proyectos-en-Arduino-Nv.2
+This repository is aimed at users who have a foundational understanding of Arduino and are ready to explore more complex projects. It includes intermediate-level projects that integrate Arduino with various sensors, actuators, and external modules, all simulated in Proteus. These projects focus on developing problem-solving skills, mastering programming logic, and understanding how to interface Arduino with more sophisticated hardware components.
